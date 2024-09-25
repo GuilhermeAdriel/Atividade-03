@@ -1,0 +1,109 @@
+package com.example.studentlist
+
+import android.os.Bundle
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ListView
+import android.widget.Spinner
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import java.text.SimpleDateFormat
+import java.util.*
+
+data class Student(val name: String, val area: String, val date: String)
+
+// Adapter class to manage the list of students
+class StudentAdapter(private val studentList: MutableList<Student>) {
+    fun addStudent(student: Student) {
+        studentList.add(student)
+    }
+
+    fun clearStudents() {
+        studentList.clear()
+    }
+
+    fun getStudents(): List<Student> {
+        return studentList
+    }
+
+    fun getCount(): Int {
+        return studentList.size
+    }
+}
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var studentAdapter: StudentAdapter
+    private lateinit var studentListView: ListView
+    private lateinit var studentCountTextView: TextView
+    private lateinit var currentDateTextView: TextView
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        val studentNameEditText: EditText = findViewById(R.id.etStudentName)
+        val spinnerArea: Spinner = findViewById(R.id.spinnerArea)
+        val addButton: Button = findViewById(R.id.btnAddStudent)
+        val resetButton: Button = findViewById(R.id.btnReset)
+        studentListView = findViewById(R.id.lvStudents)
+        studentCountTextView = findViewById(R.id.tvStudentCount)
+        currentDateTextView = findViewById(R.id.tvCurrentDate)
+
+        // Initialize the Spinner with the options
+        val areas = arrayOf("Ciências", "Matemática", "História", "Geografia", "Português")
+        val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, areas)
+        spinnerArea.adapter = spinnerAdapter
+
+        // Initialize StudentAdapter
+        studentAdapter = StudentAdapter(mutableListOf())
+
+        // ArrayAdapter for ListView
+        val listViewAdapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mutableListOf())
+        studentListView.adapter = listViewAdapter
+
+        // Display the current date
+        updateCurrentDate()
+
+        // Add student button click handler
+        addButton.setOnClickListener {
+            val name = studentNameEditText.text.toString()
+            val area = spinnerArea.selectedItem.toString()
+
+            if (name.isNotEmpty()) {
+                val student = Student(name, area, SimpleDateFormat("dd/MM/yyyy HH:mm:ss", Locale.getDefault()).format(Date()))
+                studentAdapter.addStudent(student)
+
+                // Update ListView
+                listViewAdapter.clear()
+                listViewAdapter.addAll(studentAdapter.getStudents().map { "Nome: ${it.name}, Área: ${it.area}, Adicionado em: ${it.date}" })
+                listViewAdapter.notifyDataSetChanged()
+
+                // Update student count
+                updateStudentCount()
+
+                // Clear input fields
+                studentNameEditText.text.clear()
+                spinnerArea.setSelection(0)
+            }
+        }
+
+        // Reset button click handler
+        resetButton.setOnClickListener {
+            studentAdapter.clearStudents()
+            listViewAdapter.clear()
+            listViewAdapter.notifyDataSetChanged()
+            updateStudentCount()
+        }
+    }
+
+    private fun updateStudentCount() {
+        studentCountTextView.text = "Total de alunos: ${studentAdapter.getCount()}"
+    }
+
+    private fun updateCurrentDate() {
+        val currentDate = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date())
+        currentDateTextView.text = "Data Atual: $currentDate"
+    }
+}
