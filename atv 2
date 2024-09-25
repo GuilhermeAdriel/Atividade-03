@@ -1,0 +1,90 @@
+package com.example.churrasco
+
+import android.os.Bundle
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import kotlin.math.ceil
+
+class MainActivity : AppCompatActivity() {
+
+    private lateinit var etMen: EditText
+    private lateinit var etWomen: EditText
+    private lateinit var etChildren: EditText
+    private lateinit var btnCalculate: Button
+    private lateinit var btnClear: Button
+    private lateinit var tvResults: TextView
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        // Referenciar os elementos da interface
+        etMen = findViewById(R.id.etMen)
+        etWomen = findViewById(R.id.etWomen)
+        etChildren = findViewById(R.id.etChildren)
+        btnCalculate = findViewById(R.id.btnCalculate)
+        btnClear = findViewById(R.id.btnClear)
+        tvResults = findViewById(R.id.tvResults)
+
+        btnCalculate.setOnClickListener {
+            calculate()
+        }
+
+        btnClear.setOnClickListener {
+            clearFields()
+        }
+    }
+
+    private fun calculate() {
+        val menCount = etMen.text.toString().toIntOrNull() ?: 0
+        val womenCount = etWomen.text.toString().toIntOrNull() ?: 0
+        val childrenCount = etChildren.text.toString().toIntOrNull() ?: 0
+
+        // Carne (em gramas)
+        val meatMen = menCount * 400
+        val meatWomen = womenCount * 300
+        val meatChildren = childrenCount * 200
+        val totalMeat = (meatMen + meatWomen + meatChildren) * 1.1 // Adicionando 10%
+
+        // Aperitivos (em gramas)
+        val appetizersMen = menCount * 150
+        val appetizersWomen = womenCount * 100
+        val appetizersChildren = childrenCount * 50
+        val totalAppetizers = (appetizersMen + appetizersWomen + appetizersChildren) * 1.1 // Adicionando 10%
+
+        // Bebidas Alcoólicas (em litros)
+        val alcoholMen = menCount * 4.0
+        val alcoholWomen = womenCount * 2.0
+        val totalAlcohol = (alcoholMen + alcoholWomen) * 1.1 // Adicionando 10%
+
+        // Água (em litros)
+        val waterWomen = womenCount * 2.0
+        val waterChildren = childrenCount * 2.0
+        val totalWater = (waterWomen + waterChildren) * 1.1 // Adicionando 10%
+
+        // Refrigerante (em litros)
+        val sodaWomen = womenCount * 1.5
+        val sodaChildren = childrenCount * 1.5
+        val totalSoda = (sodaWomen + sodaChildren) * 1.1 // Adicionando 10%
+
+        // Atualizar os resultados
+        val results = """
+            Carne: ${ceil(totalMeat)} g
+            Aperitivos: ${ceil(totalAppetizers)} g
+            Bebida Alcoólica: ${"%.1f".format(totalAlcohol)} L
+            Água: ${"%.1f".format(totalWater)} L
+            Refrigerante: ${"%.1f".format(totalSoda)} L
+        """.trimIndent()
+
+        tvResults.text = results
+    }
+
+    private fun clearFields() {
+        etMen.text.clear()
+        etWomen.text.clear()
+        etChildren.text.clear()
+        tvResults.text = ""
+    }
+}
